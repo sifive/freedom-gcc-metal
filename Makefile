@@ -69,7 +69,7 @@ $(REDHAT)-gcc-configure     := --with-system-zlib
 include scripts/Package.mk
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc/build.stamp
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp
 	mkdir -p $(dir $@)
 	date > $@
 
@@ -165,9 +165,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 	$(MAKE) -C $(dir $@) -j1 install-gcc &>$($@_REC)/build-gcc-stage1-make-install.log
 	date > $@
 
-$(OBJDIR)/%/build/riscv-gnu-toolchain/build-gcc-stage2/stamp: \
-		$(OBJDIR)/%/build/riscv-gnu-toolchain/build-newlib/stamp \
-		$(OBJDIR)/%/build/riscv-gnu-toolchain/build-newlib-nano-install/stamp
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/build/$(PACKAGE_HEADING),$@))
