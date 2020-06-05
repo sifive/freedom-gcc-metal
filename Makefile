@@ -125,6 +125,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp: \
 		CXXFLAGS="-O2" &>$($@_REC)/$(SRCNAME_BINUTILS)-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/$(SRCNAME_BINUTILS)-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/$(SRCNAME_BINUTILS)-make-install.log
+	find $(abspath $($@_INSTALL)) -type fl > $($@_REC)/$(SRCNAME_BINUTILS)-install-file-list
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
@@ -303,6 +304,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-gcc-stage2-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/build-gcc-stage2-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/build-gcc-stage2-make-install.log
+	cat $($@_REC)/$(SRCNAME_BINUTILS)-install-file-list | xargs rm -rf
 	date > $@
 
 # The Windows build requires the native toolchain.  The dependency is enforced
