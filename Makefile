@@ -9,6 +9,8 @@ PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)
 # Source code directory references
 SRCNAME_GCC := riscv-gcc
 SRCPATH_GCC := $(SRCDIR)/$(SRCNAME_GCC)
+SRCNAME_NEWLIB := riscv-newlib
+SRCPATH_NEWLIB := $(SRCDIR)/$(SRCNAME_NEWLIB)
 SRCNAME_BINUTILS := riscv-binutils
 SRCPATH_BINUTILS := $(SRCDIR)/$(SRCNAME_BINUTILS)
 BARE_METAL_ABI := lp64d
@@ -92,7 +94,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	mkdir -p $($@_REC)
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
-	cp -a $(SRCPATH_BINUTILS) $(SRCPATH_GCC) $(dir $@)
+	cp -a $(SRCPATH_BINUTILS) $(SRCPATH_NEWLIB) $(SRCPATH_GCC) $(dir $@)
 	cd $(dir $@)/riscv-gcc; ./contrib/download_prerequisites
 	cd $(dir $@)/riscv-gcc/gcc/config/riscv; rm t-elf-multilib; ./multilib-generator $(BARE_METAL_MULTILIBS_GEN) > t-elf-multilib
 	cp $(dir $@)/riscv-gcc/gcc/config/riscv/t-elf-multilib $($@_REC)/riscv-gcc-t-elf-multilib
@@ -165,8 +167,105 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 	$(MAKE) -C $(dir $@) -j1 install-gcc &>$($@_REC)/build-gcc-stage1-make-install.log
 	date > $@
 
-$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	rm -rf $(dir $@)
+	mkdir -p $(dir $@)
+	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-newlib/configure \
+		--target=$(BARE_METAL_TUPLE) \
+		$($($@_TARGET)-gcc-host) \
+		--prefix=$(abspath $($@_INSTALL)) \
+		--enable-newlib-io-long-double \
+		--enable-newlib-io-long-long \
+		--enable-newlib-io-c99-formats \
+		--enable-newlib-register-fini \
+		CFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE $(BARE_METAL_CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-newlib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/build-newlib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-newlib-make-install.log
+# These install multiple copies of the same docs into the same destination
+# for a multilib build.  So we must not parallelize them.
+# TODO: Rewrite so that we only install one copy of the docs.
+	$(MAKE) -j1 -C $(dir $@) install-pdf install-html &>$($@_REC)/build-newlib-make-install-doc.log
+	date > $@
+
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp: \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	rm -rf $(dir $@)
+	mkdir -p $(dir $@)
+	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-newlib/configure \
+		--target=$(BARE_METAL_TUPLE) \
+		$($($@_TARGET)-gcc-host) \
+		--prefix=$(abspath $($@_BUILD)/build-newlib-nano-install) \
+		--enable-newlib-reent-small \
+		--disable-newlib-fvwrite-in-streamio \
+		--disable-newlib-fseek-optimization \
+		--disable-newlib-wide-orient \
+		--enable-newlib-nano-malloc \
+		--disable-newlib-unbuf-stream-opt \
+		--enable-lite-exit \
+		--enable-newlib-global-atexit \
+		--enable-newlib-nano-formatted-io \
+		--disable-newlib-supplied-syscalls \
+		--disable-nls \
+		CFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections $(BARE_METAL_CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-newlib-nano-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/build-newlib-nano-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-newlib-nano-make-install.log
+	date > $@
+
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+# Copy nano library files into newlib install dir.
+	set -e; \
+	bnl="$(abspath $($@_BUILD))/build-newlib-nano-install/$(BARE_METAL_TUPLE)/lib"; \
+	inl="$(abspath $($@_INSTALL))/$(BARE_METAL_TUPLE)/lib"; \
+	for bnlc in `find $${bnl} -name libc.a`; \
+	do \
+		inlc=`echo $${bnlc} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libc\.a:libc_nano.a:g"`; \
+		cp $${bnlc} $${inl}$${inlc}; \
+	done; \
+	for bnlm in `find $${bnl} -name libm.a`; \
+	do \
+		inlm=`echo $${bnlm} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libm\.a:libm_nano.a:g"`; \
+		cp $${bnlm} $${inl}$${inlm}; \
+	done; \
+	for bnlg in `find $${bnl} -name libg.a`; \
+	do \
+		inlg=`echo $${bnlg} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libg\.a:libg_nano.a:g"`; \
+		cp $${bnlg} $${inl}$${inlg}; \
+	done; \
+	for bnls in `find $${bnl} -name libgloss.a`; \
+	do \
+		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libgloss\.a:libgloss_nano.a:g"`; \
+		cp $${bnls} $${inl}$${inls}; \
+	done
+	for bnls in `find $${bnl} -name crt0.0`; \
+	do \
+		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::"`; \
+		cp $${bnls} $${inl}$${inls}; \
+	done
+# Copy nano header files into newlib install dir.
+	mkdir -p $(abspath $($@_INSTALL))/$(BARE_METAL_TUPLE)/include/newlib-nano; \
+	cp $(abspath $($@_BUILD))/build-newlib-nano-install/$(BARE_METAL_TUPLE)/include/newlib.h \
+		$(abspath $($@_INSTALL))/$(BARE_METAL_TUPLE)/include/newlib-nano/newlib.h; \
+	date > $@
+
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/build/$(PACKAGE_HEADING),$@))
@@ -184,7 +283,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		--enable-languages=c,c++ \
 		--enable-tls \
 		--with-newlib \
-		--with-sysroot=$(abspath $($@_INSTALL))/$(NEWLIB_TUPLE) \
+		--with-sysroot=$(abspath $($@_INSTALL))/$(BARE_METAL_TUPLE) \
 		--with-native-system-header-dir=/include \
 		--disable-libmudflap \
 		--disable-libssp \

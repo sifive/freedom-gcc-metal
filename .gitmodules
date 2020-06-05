@@ -4,3 +4,6 @@
 [submodule "src/riscv-gcc"]
 	path = src/riscv-gcc
 	url = git@github.com:sifive/riscv-gcc.git
+[submodule "src/riscv-newlib"]
+	path = src/riscv-newlib
+	url = git@github.com:sifive/riscv-newlib.git
