@@ -95,7 +95,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	cp -a $(SRCPATH_BINUTILS) $(SRCPATH_GCC) $(dir $@)
 	cd $(dir $@)/riscv-gcc; ./contrib/download_prerequisites
 	cd $(dir $@)/riscv-gcc/gcc/config/riscv; rm t-elf-multilib; ./multilib-generator $(BARE_METAL_MULTILIBS_GEN) > t-elf-multilib
-	cp $(dir $@)/riscv-gcc/gcc/config/riscv/riscv-gcc-t-elf-multilib $($@_REC)
+	cp $(dir $@)/riscv-gcc/gcc/config/riscv/t-elf-multilib $($@_REC)/riscv-gcc-t-elf-multilib
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp: \
