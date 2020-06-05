@@ -172,7 +172,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-newlib/configure \
@@ -198,7 +198,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-newlib/configure \
