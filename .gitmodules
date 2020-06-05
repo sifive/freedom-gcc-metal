@@ -1,0 +1,6 @@
+[submodule "src/riscv-binutils"]
+	path = src/riscv-binutils
+	url = git@github.com:sifive/riscv-binutils-gdb.git
+[submodule "src/riscv-gcc"]
+	path = src/riscv-gcc
+	url = git@github.com:sifive/riscv-gcc.git
