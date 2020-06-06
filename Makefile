@@ -21,6 +21,24 @@ BARE_METAL_CC_FOR_TARGET ?= $(BARE_METAL_TUPLE)-gcc
 BARE_METAL_CXX_FOR_TARGET ?= $(BARE_METAL_TUPLE)-g++
 BARE_METAL_CFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
 BARE_METAL_CXXFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
+
+ifeq ($(BUILD_FLAGS),basic)
+BARE_METAL_MULTILIBS_GEN := \
+	rv32e-ilp32e--m,a,ma,c,mc,ac \
+	rv32emac-ilp32e-- \
+	rv32i-ilp32--m,a,ma,c,mc,ac \
+	rv32imac-ilp32-- \
+	rv32if-ilp32f--mf,af,maf,fc,mfc,afc \
+	rv32imafc-ilp32f-- \
+	rv32ifd-ilp32d--mfd,afd,mafd,fdc,mfdc,afdc \
+	rv32imafdc-ilp32d-- \
+	rv64i-lp64--m,a,ma,c,mc,ac \
+	rv64imac-lp64-- \
+	rv64if-lp64f--mf,af,maf,fc,mfc,afc \
+	rv64imafc-lp64f-- \
+	rv64ifd-lp64d--mfd,afd,mafd,fdc,mfdc,afdc \
+	rv64imafdc-lp64d--
+else
 BARE_METAL_MULTILIBS_GEN := \
 	rv32e-ilp32e--c \
 	rv32ea-ilp32e--m \
@@ -57,6 +75,7 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv64imfd-lp64d--c \
 	rv64iafd-lp64d-rv64imafd,rv64iafdc- \
 	rv64imafdc-lp64d--
+endif
 
 # Some special package configure flags for specific targets
 $(WIN64)-gcc-host           := --host=$(WIN64)
@@ -124,7 +143,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp: \
 		CFLAGS="-O2" \
 		CXXFLAGS="-O2" &>$($@_REC)/$(SRCNAME_BINUTILS)-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/$(SRCNAME_BINUTILS)-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/$(SRCNAME_BINUTILS)-make-install.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/$(SRCNAME_BINUTILS)-make-install.log
 	find $(abspath $($@_INSTALL)) -type fl > $($@_REC)/$(SRCNAME_BINUTILS)-install-file-list
 	date > $@
 
