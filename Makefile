@@ -4,7 +4,7 @@ include scripts/Freedom.mk
 # Include version identifiers to build up the full version string
 include Version.mk
 PACKAGE_HEADING := freedom-gcc-metal
-PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)
+PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
 SRCNAME_GCC := riscv-gcc
@@ -22,7 +22,7 @@ BARE_METAL_CXX_FOR_TARGET ?= $(BARE_METAL_TUPLE)-g++
 BARE_METAL_CFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
 BARE_METAL_CXXFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
 
-ifeq ($(BUILD_FLAGS),basic)
+ifeq ($(EXTRA_OPTION),basic)
 BARE_METAL_MULTILIBS_GEN := \
 	rv32e-ilp32e--m,a,ma,c,mc,ac \
 	rv32emac-ilp32e-- \
@@ -91,7 +91,11 @@ include scripts/Package.mk
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	mkdir -p $(dir $@)
+	git log > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).commitlog
+	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
 	date > $@
 
 # We might need some extra target libraries for this package
@@ -119,17 +123,20 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	cp $(dir $@)/riscv-gcc/gcc/config/riscv/t-elf-multilib $($@_REC)/riscv-gcc-t-elf-multilib
 	date > $@
 
-$(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp: \
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
-	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp,%,$@))
-	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	rm -rf $(dir $@)
+	mkdir -p $(dir $@)
 # CC_FOR_TARGET is required for the ld testsuite.
-	cd $(dir $@) && CC_FOR_TARGET=$(BARE_METAL_CC_FOR_TARGET) ./configure \
+	cd $(dir $@) && CC_FOR_TARGET=$(BARE_METAL_CC_FOR_TARGET) $(abspath $($@_BUILD))/$(SRCNAME_BINUTILS)/configure \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--with-pkgversion="SiFive GCC Metal $(PACKAGE_VERSION)" \
+		--with-pkgversion="SiFive GCC-Metal $(PACKAGE_VERSION)" \
 		--with-bugurl="https://github.com/sifive/freedom-tools/issues" \
 		--disable-werror \
 		--disable-gdb \
@@ -141,14 +148,14 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp: \
 		--with-mpfr=no \
 		--with-gmp=no \
 		CFLAGS="-O2" \
-		CXXFLAGS="-O2" &>$($@_REC)/$(SRCNAME_BINUTILS)-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/$(SRCNAME_BINUTILS)-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/$(SRCNAME_BINUTILS)-make-install.log
-	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/$(SRCNAME_BINUTILS)-install-file-list
+		CXXFLAGS="-O2" &>$($@_REC)/build-binutils-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/build-binutils-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-binutils-make-install.log
+	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/build-binutils-install-file-list
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_BINUTILS)/build.stamp
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/build/$(PACKAGE_HEADING),$@))
@@ -159,7 +166,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--with-pkgversion="SiFive GCC Metal $(PACKAGE_VERSION)" \
+		--with-pkgversion="SiFive GCC-Metal $(PACKAGE_VERSION)" \
 		--with-bugurl="https://github.com/sifive/freedom-tools/issues" \
 		--disable-shared \
 		--disable-threads \
@@ -296,7 +303,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--with-pkgversion="SiFive GCC Metal $(PACKAGE_VERSION)" \
+		--with-pkgversion="SiFive GCC-Metal $(PACKAGE_VERSION)" \
 		--with-bugurl="https://github.com/sifive/freedom-tools/issues" \
 		--disable-shared \
 		--disable-threads \
@@ -323,10 +330,19 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-gcc-stage2-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/build-gcc-stage2-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/build-gcc-stage2-make-install.log
-	cat $($@_REC)/$(SRCNAME_BINUTILS)-install-file-list | xargs rm -rf
+	cat $($@_REC)/build-binutils-install-file-list | xargs rm -rf
 	date > $@
 
 # The Windows build requires the native toolchain.  The dependency is enforced
 # here, PATH allows the tools to get access.
 $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp: \
 	$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
+
+$(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/test.stamp: \
+		$(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/launch.stamp
+	mkdir -p $(dir $@)
+	PATH=$(abspath $(OBJDIR)/$(NATIVE)/launch/$(PACKAGE_TARNAME)/bin):$(PATH) riscv64-unknown-elf-c++ -v
+	PATH=$(abspath $(OBJDIR)/$(NATIVE)/launch/$(PACKAGE_TARNAME)/bin):$(PATH) riscv64-unknown-elf-g++ -v
+	PATH=$(abspath $(OBJDIR)/$(NATIVE)/launch/$(PACKAGE_TARNAME)/bin):$(PATH) riscv64-unknown-elf-gcc -v
+	@echo "Finished testing $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).tar.gz tarball"
+	date > $@
