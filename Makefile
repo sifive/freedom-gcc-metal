@@ -89,13 +89,24 @@ $(REDHAT)-gcc-configure     := --with-system-zlib
 # Targets $(PACKAGE_HEADING)/install.stamp and $(PACKAGE_HEADING)/libs.stamp
 include scripts/Package.mk
 
+# The package build needs the tools in the PATH, and the windows build might use the ubuntu (native)
+PATH := $(abspath $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install-binutils/bin):$(PATH)
+export PATH
+
+# The Windows build requires the native toolchain.  The dependency is enforced
+# here, PATH allows the tools to get access.
+$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp: \
+	$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
+
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)
 	git log > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).commitlog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
+	cat $($@_REC)/install-binutils-file-list | xargs rm -rf
 	date > $@
 
 # We might need some extra target libraries for this package
@@ -151,7 +162,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp: \
 		CXXFLAGS="-O2" &>$($@_REC)/build-binutils-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/build-binutils-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-binutils-make-install.log
-	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/build-binutils-install-file-list
+	rm -rf $(abspath $($@_BUILD))/install-binutils
+	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-binutils
+	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/install-binutils-file-list
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
@@ -330,13 +343,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-gcc-stage2-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/build-gcc-stage2-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/build-gcc-stage2-make-install.log
-	cat $($@_REC)/build-binutils-install-file-list | xargs rm -rf
 	date > $@
-
-# The Windows build requires the native toolchain.  The dependency is enforced
-# here, PATH allows the tools to get access.
-$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp: \
-	$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
 
 $(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/test.stamp: \
 		$(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/launch.stamp
