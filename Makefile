@@ -22,7 +22,16 @@ BARE_METAL_CXX_FOR_TARGET ?= $(BARE_METAL_TUPLE)-g++
 BARE_METAL_CFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
 BARE_METAL_CXXFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
 
-ifeq ($(EXTRA_OPTION),basic)
+ifeq ($(EXTRA_OPTION),minimal)
+BARE_METAL_MULTILIBS_GEN := \
+	rv32emac-ilp32e-- \
+	rv32imac-ilp32-- \
+	rv32imafc-ilp32f-- \
+	rv32imafdc-ilp32d-- \
+	rv64imac-lp64-- \
+	rv64imafc-lp64f-- \
+	rv64imafdc-lp64d--
+else ifeq ($(EXTRA_OPTION),basic)
 BARE_METAL_MULTILIBS_GEN := \
 	rv32e-ilp32e--m,a,ma,c,mc,ac \
 	rv32emac-ilp32e-- \
@@ -106,6 +115,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 	mkdir -p $(dir $@)
 	git log > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).commitlog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
+	rm -rf $(abspath $($@_BUILD))/install-binutils
+	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-binutils
 	cat $($@_REC)/install-binutils-file-list | xargs rm -rf
 	date > $@
 
@@ -162,8 +173,6 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp: \
 		CXXFLAGS="-O2" &>$($@_REC)/build-binutils-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/build-binutils-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-binutils-make-install.log
-	rm -rf $(abspath $($@_BUILD))/install-binutils
-	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-binutils
 	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/install-binutils-file-list
 	date > $@
 
@@ -215,6 +224,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp: \
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
+	@echo "PATH: $(PATH)"
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-newlib/configure \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
@@ -241,6 +251,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp: \
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
+	@echo "PATH: $(PATH)"
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-newlib/configure \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
