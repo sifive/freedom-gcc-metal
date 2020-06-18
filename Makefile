@@ -11,7 +11,7 @@ SRCNAME_GCC := riscv-gcc
 SRCPATH_GCC := $(SRCDIR)/$(SRCNAME_GCC)
 SRCNAME_NEWLIB := riscv-newlib
 SRCPATH_NEWLIB := $(SRCDIR)/$(SRCNAME_NEWLIB)
-SRCNAME_BINUTILS := riscv-binutils
+SRCNAME_BINUTILS := binutils-metal
 SRCPATH_BINUTILS := $(SRCDIR)/$(SRCNAME_BINUTILS)
 BARE_METAL_ABI := lp64d
 BARE_METAL_ARCH := rv64imafdc
@@ -21,6 +21,7 @@ BARE_METAL_CC_FOR_TARGET ?= $(BARE_METAL_TUPLE)-gcc
 BARE_METAL_CXX_FOR_TARGET ?= $(BARE_METAL_TUPLE)-g++
 BARE_METAL_CFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
 BARE_METAL_CXXFLAGS_FOR_TARGET := -mcmodel=$(BARE_METAL_CMODEL)
+BARE_METAL_BINUTILS = riscv-binutils
 
 ifeq ($(EXTRA_OPTION),minimal)
 BARE_METAL_MULTILIBS_GEN := \
@@ -87,12 +88,18 @@ BARE_METAL_MULTILIBS_GEN := \
 endif
 
 # Some special package configure flags for specific targets
-$(WIN64)-gcc-host           := --host=$(WIN64)
-$(WIN64)-gcc-configure      := --without-system-zlib
-$(UBUNTU64)-gcc-host        := --host=x86_64-linux-gnu
-$(UBUNTU64)-gcc-configure   := --with-system-zlib
-$(DARWIN)-gcc-configure     := --with-system-zlib
-$(REDHAT)-gcc-configure     := --with-system-zlib
+$(WIN64)-binutils-host          := --host=$(WIN64)
+$(WIN64)-binutils-configure     := --with-included-gettext
+$(WIN64)-gcc-host               := --host=$(WIN64)
+$(WIN64)-gcc-configure          := --without-system-zlib
+$(UBUNTU64)-binutils-host       := --host=x86_64-linux-gnu
+$(UBUNTU64)-binutils-configure  := --with-included-gettext
+$(UBUNTU64)-gcc-host            := --host=x86_64-linux-gnu
+$(UBUNTU64)-gcc-configure       := --with-system-zlib
+$(DARWIN)-binutils-configure    := --with-included-gettext
+$(DARWIN)-gcc-configure         := --with-system-zlib
+$(REDHAT)-binutils-configure    := --with-included-gettext
+$(REDHAT)-gcc-configure         := --with-system-zlib
 
 # Setup the package targets and switch into secondary makefile targets
 # Targets $(PACKAGE_HEADING)/install.stamp and $(PACKAGE_HEADING)/libs.stamp
@@ -140,39 +147,20 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	mkdir -p $($@_REC)
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
-	cp -a $(SRCPATH_BINUTILS) $(SRCPATH_NEWLIB) $(SRCPATH_GCC) $(dir $@)
+	cp -a $(SRCPATH_BINUTILS)/src/$(BARE_METAL_BINUTILS) $(SRCPATH_NEWLIB) $(SRCPATH_GCC) $(dir $@)
 	cd $(dir $@)/riscv-gcc; ./contrib/download_prerequisites
 	cd $(dir $@)/riscv-gcc/gcc/config/riscv; rm t-elf-multilib; ./multilib-generator $(BARE_METAL_MULTILIBS_GEN) > t-elf-multilib
 	cp $(dir $@)/riscv-gcc/gcc/config/riscv/t-elf-multilib $($@_REC)/riscv-gcc-t-elf-multilib
 	date > $@
 
+# Reusing binutils build script across binutils-metal, gcc-metal and trace-decoder
+include $(SRCPATH_BINUTILS)/scripts/Support.mk
+
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp: \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/support.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/build/$(PACKAGE_HEADING),$@))
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	rm -rf $(dir $@)
-	mkdir -p $(dir $@)
-# CC_FOR_TARGET is required for the ld testsuite.
-	cd $(dir $@) && CC_FOR_TARGET=$(BARE_METAL_CC_FOR_TARGET) $(abspath $($@_BUILD))/$(SRCNAME_BINUTILS)/configure \
-		--target=$(BARE_METAL_TUPLE) \
-		$($($@_TARGET)-gcc-host) \
-		--prefix=$(abspath $($@_INSTALL)) \
-		--with-pkgversion="SiFive GCC-Metal $(PACKAGE_VERSION)" \
-		--with-bugurl="https://github.com/sifive/freedom-tools/issues" \
-		--disable-werror \
-		--disable-gdb \
-		--disable-sim \
-		--disable-libdecnumber \
-		--disable-libreadline \
-		--with-included-gettext \
-		--with-mpc=no \
-		--with-mpfr=no \
-		--with-gmp=no \
-		CFLAGS="-O2" \
-		CXXFLAGS="-O2" &>$($@_REC)/build-binutils-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/build-binutils-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-binutils-make-install.log
 	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/install-binutils-file-list
 	date > $@

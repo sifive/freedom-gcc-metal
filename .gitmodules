@@ -7,3 +7,6 @@
 [submodule "src/riscv-newlib"]
 	path = src/riscv-newlib
 	url = git@github.com:sifive/riscv-newlib.git
+[submodule "src/binutils-metal"]
+	path = src/binutils-metal
+	url = git@github.com:sifive/freedom-binutils-metal.git
