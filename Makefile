@@ -106,12 +106,12 @@ $(REDHAT)-gcc-configure         := --with-system-zlib
 include scripts/Package.mk
 
 # The package build needs the tools in the PATH, and the windows build might use the ubuntu (native)
-PATH := $(abspath $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install-binutils/bin):$(PATH)
+PATH := $(abspath $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install-gcc/bin):$(PATH)
 export PATH
 
 # The Windows build requires the native toolchain.  The dependency is enforced
 # here, PATH allows the tools to get access.
-$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp: \
+$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp: \
 	$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
@@ -123,8 +123,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 	mkdir -p $(dir $@)
 	git log > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).commitlog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
-	rm -rf $(abspath $($@_BUILD))/install-binutils
-	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-binutils
+	rm -rf $(abspath $($@_BUILD))/install-gcc
+	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-gcc
 	cat $($@_REC)/install-binutils-file-list | xargs rm -rf
 	date > $@
 
