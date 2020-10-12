@@ -7,8 +7,6 @@ export PATH
 .PHONY: win64-package
 win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).zip
 win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip
-win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz
-win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz
 .PHONY: ubuntu64-package
 ubuntu64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64).tar.gz
 ubuntu64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64).src.tar.gz
@@ -24,31 +22,32 @@ darwin-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN).src.ta
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).zip: \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp \
+		$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz
 	mkdir -p $(dir $@)
 	cd $(OBJDIR)/$(WIN64)/install; zip -rq $(abspath $@) $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip: \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp \
+		$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz
 	mkdir -p $(dir $@)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
-	cp -a $(OBJ_WIN64)/rec/$(PACKAGE_HEADING) $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 	cd $(abspath $(PREFIXPATH).); zip -x "/bin/*" "/obj/*" -rq $(abspath $@) .git* *
 	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz: \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
 	$(TAR) --dereference --hard-dereference -C $(OBJDIR)/$(WIN64)/install -c $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64) | gzip > $(abspath $@)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz: \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
 	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 	cp -a $(OBJ_WIN64)/rec/$(PACKAGE_HEADING) $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 	$(TAR) --dereference --hard-dereference -C $(abspath $(PREFIXPATH).) --exclude bin --exclude obj -c .git* * | gzip > $(abspath $@)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).tar.gz: \
 		$(OBJDIR)/$(NATIVE)/build/$(PACKAGE_HEADING)/install.stamp

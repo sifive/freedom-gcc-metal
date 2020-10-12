@@ -3,7 +3,7 @@ include scripts/Freedom.mk
 
 # Include version identifiers to build up the full version string
 include Version.mk
-PACKAGE_HEADING := freedom-gcc-metal
+PACKAGE_HEADING := riscv64-unknown-elf-gcc
 PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
@@ -50,41 +50,41 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv64imafdc-lp64d--
 else
 BARE_METAL_MULTILIBS_GEN := \
-	rv32e-ilp32e--c \
-	rv32ea-ilp32e--m \
-	rv32em-ilp32e--c \
-	rv32eac-ilp32e-- \
-	rv32emac-ilp32e-- \
-	rv32i-ilp32--c,f,fc,fd,fdc \
-	rv32ia-ilp32-rv32ima,rv32iaf,rv32imaf,rv32iafd,rv32imafd- \
-	rv32im-ilp32--c,f,fc,fd,fdc \
-	rv32iac-ilp32--f,fd \
-	rv32imac-ilp32-rv32imafc,rv32imafdc- \
-	rv32if-ilp32f--c,d,dc \
-	rv32iaf-ilp32f--c,d,dc \
-	rv32imf-ilp32f--d \
-	rv32imaf-ilp32f-rv32imafd- \
-	rv32imfc-ilp32f--d \
-	rv32imafc-ilp32f-rv32imafdc- \
-	rv32ifd-ilp32d--c \
-	rv32imfd-ilp32d--c \
-	rv32iafd-ilp32d-rv32imafd,rv32iafdc- \
-	rv32imafdc-ilp32d-- \
-	rv64i-lp64--c,f,fc,fd,fdc \
-	rv64ia-lp64-rv64ima,rv64iaf,rv64imaf,rv64iafd,rv64imafd- \
-	rv64im-lp64--c,f,fc,fd,fdc \
-	rv64iac-lp64--f,fd \
-	rv64imac-lp64-rv64imafc,rv64imafdc- \
-	rv64if-lp64f--c,d,dc \
-	rv64iaf-lp64f--c,d,dc \
-	rv64imf-lp64f--d \
-	rv64imaf-lp64f-rv64imafd- \
-	rv64imfc-lp64f--d \
-	rv64imafc-lp64f-rv64imafdc- \
-	rv64ifd-lp64d--c \
-	rv64imfd-lp64d--c \
-	rv64iafd-lp64d-rv64imafd,rv64iafdc- \
-	rv64imafdc-lp64d--
+	rv32e-ilp32e--c*v*zvqmac \
+	rv32ea-ilp32e--m*v*zvqmac \
+	rv32em-ilp32e--c*v*zvqmac \
+	rv32eac-ilp32e--v*zvqmac \
+	rv32emac-ilp32e--v*zvqmac \
+	rv32i-ilp32--c*f*d*zfh*v*zvqmac \
+	rv32ia-ilp32--m*f*d*v*zfh*zvqmac \
+	rv32im-ilp32--c*f*d*zfh*v*zvqmac \
+	rv32iac-ilp32--f*d*v*zfh*zvqmac \
+	rv32imac-ilp32-rv32imafc,rv32imafdc,rv32imafczfh,rv32imafdczfh-v*zvqmac \
+	rv32if-ilp32f--d*c*v*zfh*zvqmac \
+	rv32iaf-ilp32f--d*c*v*zfh*zvqmac \
+	rv32imf-ilp32f--d*v*zfh*zvqmac \
+	rv32imaf-ilp32f-rv32imafd-zfh*v*zvqmac \
+	rv32imfc-ilp32f--d*v*zfh*zvqmac \
+	rv32imafc-ilp32f-rv32imafdc-v*zfh*zvqmac \
+	rv32ifd-ilp32d--c*v*zfh*zvqmac \
+	rv32imfd-ilp32d--c*v*zfh*zvqmac \
+	rv32iafd-ilp32d-rv32imafd,rv32iafdc-v*zfh*zvqmac \
+	rv32imafdc-ilp32d--v*zfh*zvqmac \
+	rv64i-lp64--f*d*c*v*zfh*zvqmac \
+	rv64ia-lp64--m*f*d*v*zfh*zvqmac \
+	rv64im-lp64--f*d*c*v*zfh*zvqmac \
+	rv64iac-lp64--f*d*v*zfh*zvqmac \
+	rv64imac-lp64-rv64imafc,rv64imafdc,rv64imafczfh,rv64imafdczfh-v*zvqmac \
+	rv64if-lp64f--d*c*v*zfh*zvqmac \
+	rv64iaf-lp64f--d*c*v*zfh*zvqmac \
+	rv64imf-lp64f--d*v*zfh*zvqmac \
+	rv64imaf-lp64f-rv64imafd-v*zfh*zvqmac \
+	rv64imfc-lp64f--d*v*zfh*zvqmac \
+	rv64imafc-lp64f-rv64imafdc-v*zfh*zvqmac \
+	rv64ifd-lp64d--c*v*zfh*zvqmac \
+	rv64imfd-lp64d--c*v*zfh*zvqmac \
+	rv64iafd-lp64d-rv64imafd,rv64iafdc-v*zfh*zvqmac \
+	rv64imafdc-lp64d--v*zfh*zvqmac
 endif
 
 # Some special package configure flags for specific targets
@@ -135,6 +135,10 @@ $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/libs.stamp: \
 
 $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libs.stamp: \
 		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp
+	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libwinpthread*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libgcc_s_seh*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libstdc*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libssp*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
@@ -293,7 +297,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libgloss\.a:libgloss_nano.a:g"`; \
 		cp $${bnls} $${inl}$${inls}; \
 	done
-	for bnls in `find $${bnl} -name crt0.0`; \
+	for bnls in `find $${bnl} -name crt0.o`; \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::"`; \
 		cp $${bnls} $${inl}$${inls}; \
@@ -343,6 +347,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-gcc-stage2-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/build-gcc-stage2-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/build-gcc-stage2-make-install.log
+	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/riscv64-unknown-elf-c++
+	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/riscv64-unknown-elf-g++
+	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/riscv64-unknown-elf-gcc
 	date > $@
 
 $(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/test.stamp: \
