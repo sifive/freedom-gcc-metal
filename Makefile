@@ -199,8 +199,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 		$($($@_TARGET)-gcc-configure) \
 		--enable-checking=yes \
 		--enable-multilib \
-		--with-abi=$(BARE_METAL_WITH_ABI) \
-		--with-arch=$(BARE_METAL_WITH_ARCH) \
+		--with-abi=$(BARE_METAL_ABI) \
+		--with-arch=$(BARE_METAL_ARCH) \
 		CFLAGS="-O2" \
 		CXXFLAGS="-O2" \
 		CFLAGS_FOR_TARGET="-Os $(BARE_METAL_CFLAGS_FOR_TARGET)" \
@@ -339,8 +339,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		$($($@_TARGET)-gcc-configure) \
 		--enable-checking=yes \
 		--enable-multilib \
-		--with-abi=$(BARE_METAL_WITH_ABI) \
-		--with-arch=$(BARE_METAL_WITH_ARCH) \
+		--with-abi=$(BARE_METAL_ABI) \
+		--with-arch=$(BARE_METAL_ARCH) \
 		CFLAGS="-O2" \
 		CXXFLAGS="-O2" \
 		CFLAGS_FOR_TARGET="-Os $(BARE_METAL_CFLAGS_FOR_TARGET)" \
