@@ -3,6 +3,7 @@ include scripts/Freedom.mk
 
 # Include version identifiers to build up the full version string
 include Version.mk
+PACKAGE_WORDING := Bare Metal GCC
 PACKAGE_HEADING := riscv64-unknown-elf-gcc
 PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)
 
@@ -121,8 +122,17 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/build/$(PACKAGE_HEADING),$@))
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)
-	git log > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).commitlog
+	mkdir -p $(dir $@)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle/features
+	git log --format="[%ad] %s" > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).changelog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
+	tclsh scripts/generate-feature-xml.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)" $($@_TARGET) $(abspath $($@_INSTALL))
+	tclsh scripts/generate-chmod755-sh.tcl $(abspath $($@_INSTALL))
+	tclsh scripts/generate-site-xml.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)" $($@_TARGET) $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle
+	tclsh scripts/generate-bundle-mk.tcl $(abspath $($@_INSTALL)) RISCV_TAGS "$(FREEDOM_GCC_METAL_RISCV_TAGS)" TOOLS_TAGS "$(FREEDOM_GCC_METAL_TOOLS_TAGS)"
+	cp $(abspath $($@_INSTALL))/bundle.mk $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle
+	cd $($@_INSTALL); zip -rq $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle/features/$(PACKAGE_HEADING)_$(FREEDOM_GCC_METAL_ID)_$(RISCV_GCC_VERSION).jar *
+	tclsh scripts/check-maximum-path-length.tcl $(abspath $($@_INSTALL)) "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)"
+	tclsh scripts/check-same-name-different-case.tcl $(abspath $($@_INSTALL))
 	rm -rf $(abspath $($@_BUILD))/install-gcc
 	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-gcc
 	cat $($@_REC)/install-binutils-file-list | xargs rm -rf
@@ -145,12 +155,17 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	tclsh scripts/check-naming-and-version-syntax.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)"
 	rm -rf $($@_INSTALL)
 	mkdir -p $($@_INSTALL)
 	rm -rf $($@_REC)
 	mkdir -p $($@_REC)
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
+	git log > $($@_REC)/$(PACKAGE_HEADING)-git-commit.log
+	cp .gitmodules $($@_REC)/$(PACKAGE_HEADING)-git-modules.log
+	git remote -v > $($@_REC)/$(PACKAGE_HEADING)-git-remote.log
+	git submodule status > $($@_REC)/$(PACKAGE_HEADING)-git-submodule.log
 	cp -a $(SRCPATH_BINUTILS)/src/$(BARE_METAL_BINUTILS) $(SRCPATH_NEWLIB) $(SRCPATH_GCC) $(dir $@)
 	cd $(dir $@)/riscv-gcc; ./contrib/download_prerequisites
 	cd $(dir $@)/riscv-gcc/gcc/config/riscv; rm t-elf-multilib; ./multilib-generator $(BARE_METAL_MULTILIBS_GEN) > t-elf-multilib
