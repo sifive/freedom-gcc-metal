@@ -35,57 +35,57 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv64imafdc-lp64d--
 else ifeq ($(EXTRA_OPTION),basic)
 BARE_METAL_MULTILIBS_GEN := \
-	rv32e-ilp32e--m,a,ma,c,mc,ac \
+	rv32e-ilp32e-- \
 	rv32emac-ilp32e-- \
-	rv32i-ilp32--m,a,ma,c,mc,ac \
+	rv32i-ilp32-- \
 	rv32imac-ilp32-- \
-	rv32if-ilp32f--mf,af,maf,fc,mfc,afc \
+	rv32if-ilp32f-- \
 	rv32imafc-ilp32f-- \
-	rv32ifd-ilp32d--mfd,afd,mafd,fdc,mfdc,afdc \
+	rv32ifd-ilp32d-- \
 	rv32imafdc-ilp32d-- \
-	rv64i-lp64--m,a,ma,c,mc,ac \
+	rv64i-lp64-- \
 	rv64imac-lp64-- \
-	rv64if-lp64f--mf,af,maf,fc,mfc,afc \
+	rv64if-lp64f-- \
 	rv64imafc-lp64f-- \
-	rv64ifd-lp64d--mfd,afd,mafd,fdc,mfdc,afdc \
+	rv64ifd-lp64d-- \
 	rv64imafdc-lp64d--
 else
 BARE_METAL_MULTILIBS_GEN := \
-	rv32e-ilp32e--c*v*zvqmac \
-	rv32ea-ilp32e--m*v*zvqmac \
-	rv32em-ilp32e--c*v*zvqmac \
-	rv32eac-ilp32e--v*zvqmac \
-	rv32emac-ilp32e--v*zvqmac \
-	rv32i-ilp32--c*f*d*zfh*v*zvqmac \
-	rv32ia-ilp32--m*f*d*v*zfh*zvqmac \
-	rv32im-ilp32--c*f*d*zfh*v*zvqmac \
-	rv32iac-ilp32--f*d*v*zfh*zvqmac \
-	rv32imac-ilp32-rv32imafc,rv32imafdc,rv32imafczfh,rv32imafdczfh-v*zvqmac \
-	rv32if-ilp32f--d*c*v*zfh*zvqmac \
-	rv32iaf-ilp32f--d*c*v*zfh*zvqmac \
-	rv32imf-ilp32f--d*v*zfh*zvqmac \
-	rv32imaf-ilp32f-rv32imafd-zfh*v*zvqmac \
-	rv32imfc-ilp32f--d*v*zfh*zvqmac \
-	rv32imafc-ilp32f-rv32imafdc-v*zfh*zvqmac \
-	rv32ifd-ilp32d--c*v*zfh*zvqmac \
-	rv32imfd-ilp32d--c*v*zfh*zvqmac \
-	rv32iafd-ilp32d-rv32imafd,rv32iafdc-v*zfh*zvqmac \
-	rv32imafdc-ilp32d--v*zfh*zvqmac \
-	rv64i-lp64--f*d*c*v*zfh*zvqmac \
-	rv64ia-lp64--m*f*d*v*zfh*zvqmac \
-	rv64im-lp64--f*d*c*v*zfh*zvqmac \
-	rv64iac-lp64--f*d*v*zfh*zvqmac \
-	rv64imac-lp64-rv64imafc,rv64imafdc,rv64imafczfh,rv64imafdczfh-v*zvqmac \
-	rv64if-lp64f--d*c*v*zfh*zvqmac \
-	rv64iaf-lp64f--d*c*v*zfh*zvqmac \
-	rv64imf-lp64f--d*v*zfh*zvqmac \
-	rv64imaf-lp64f-rv64imafd-v*zfh*zvqmac \
-	rv64imfc-lp64f--d*v*zfh*zvqmac \
-	rv64imafc-lp64f-rv64imafdc-v*zfh*zvqmac \
-	rv64ifd-lp64d--c*v*zfh*zvqmac \
-	rv64imfd-lp64d--c*v*zfh*zvqmac \
-	rv64iafd-lp64d-rv64imafd,rv64iafdc-v*zfh*zvqmac \
-	rv64imafdc-lp64d--v*zfh*zvqmac
+	rv32e-ilp32e-- \
+	rv32ea-ilp32e-- \
+	rv32em-ilp32e-- \
+	rv32eac-ilp32e-- \
+	rv32emac-ilp32e-- \
+	rv32i-ilp32-- \
+	rv32ia-ilp32-- \
+	rv32im-ilp32-- \
+	rv32iac-ilp32-- \
+	rv32imac-ilp32-- \
+	rv32if-ilp32f-- \
+	rv32iaf-ilp32f-- \
+	rv32imf-ilp32f-- \
+	rv32imaf-ilp32f-- \
+	rv32imfc-ilp32f-- \
+	rv32imafc-ilp32f-- \
+	rv32ifd-ilp32d-- \
+	rv32imfd-ilp32d-- \
+	rv32iafd-ilp32d-- \
+	rv32imafdc-ilp32d-- \
+	rv64i-lp64-- \
+	rv64ia-lp64-- \
+	rv64im-lp64-- \
+	rv64iac-lp64-- \
+	rv64imac-lp64-- \
+	rv64if-lp64f-- \
+	rv64iaf-lp64f-- \
+	rv64imf-lp64f-- \
+	rv64imaf-lp64f-- \
+	rv64imfc-lp64f-- \
+	rv64imafc-lp64f-- \
+	rv64ifd-lp64d-- \
+	rv64imfd-lp64d-- \
+	rv64iafd-lp64d-- \
+	rv64imafdc-lp64d--
 endif
 
 # Some special package configure flags for specific targets
