@@ -31,8 +31,7 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv32imafc-ilp32f-- \
 	rv32imafdc-ilp32d-- \
 	rv64imac-lp64-- \
-	rv64imafc-lp64f-- \
-	rv64imafdc-lp64d--
+	rv64imafc-lp64f--
 else ifeq ($(EXTRA_OPTION),basic)
 BARE_METAL_MULTILIBS_GEN := \
 	rv32e-ilp32e-- \
@@ -47,8 +46,7 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv64imac-lp64-- \
 	rv64if-lp64f-- \
 	rv64imafc-lp64f-- \
-	rv64ifd-lp64d-- \
-	rv64imafdc-lp64d--
+	rv64ifd-lp64d--
 else
 BARE_METAL_MULTILIBS_GEN := \
 	rv32e-ilp32e-- \
@@ -84,8 +82,7 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv64imafc-lp64f-- \
 	rv64ifd-lp64d-- \
 	rv64imfd-lp64d-- \
-	rv64iafd-lp64d-- \
-	rv64imafdc-lp64d--
+	rv64iafd-lp64d--
 endif
 
 # Some special package configure flags for specific targets
