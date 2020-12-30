@@ -195,6 +195,11 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
+	# Workaround for CentOS random build fail issue
+	#
+	# Corresponding bugzilla entry on upstream:
+	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=92008
+	touch $(abspath $($@_BUILD))/riscv-gcc/intl/plural.c
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-gcc/configure \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
