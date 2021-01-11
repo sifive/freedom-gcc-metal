@@ -53,41 +53,38 @@ BARE_METAL_MULTILIBS_GEN := \
 	--cmodel=compact
 else
 BARE_METAL_MULTILIBS_GEN := \
-	rv32e-ilp32e-- \
-	rv32ea-ilp32e-- \
-	rv32em-ilp32e-- \
+	rv32ec-ilp32e-- \
+	rv32ec_zba_zbb-ilp32e-- \
 	rv32eac-ilp32e-- \
+	rv32eac_zba_zbb-ilp32e-- \
+	rv32emc-ilp32e-- \
+	rv32emc_zba_zbb-ilp32e-- \
 	rv32emac-ilp32e-- \
-	rv32i-ilp32-- \
-	rv32ia-ilp32-- \
-	rv32im-ilp32-- \
+	rv32emac_zba_zbb-ilp32e-- \
+	rv32ic-ilp32-- \
+	rv32ic_zba_zbb-ilp32-- \
 	rv32iac-ilp32-- \
+	rv32iac_zba_zbb-ilp32-- \
+	rv32imc-ilp32-- \
+	rv32imc_zba_zbb-ilp32-- \
 	rv32imac-ilp32-- \
-	rv32if-ilp32f-- \
-	rv32iaf-ilp32f-- \
-	rv32imf-ilp32f-- \
-	rv32imaf-ilp32f-- \
+	rv32imac_zba_zbb-ilp32-- \
 	rv32imfc-ilp32f-- \
+	rv32imfc_zba_zbb-ilp32f-- \
 	rv32imafc-ilp32f-- \
-	rv32ifd-ilp32d-- \
-	rv32imfd-ilp32d-- \
-	rv32iafd-ilp32d-- \
+	rv32imafc_zba_zbb-ilp32f-- \
+	rv32imfdc-ilp32d-- \
+	rv32imfdc_zba_zbb-ilp32d-- \
 	rv32imafdc-ilp32d-- \
-	rv64i-lp64-- \
-	rv64ia-lp64-- \
-	rv64im-lp64-- \
+	rv32imafdc_zba_zbb-ilp32d-- \
 	rv64iac-lp64-- \
+	rv64iac_zba_zbb-lp64-- \
 	rv64imac-lp64-- \
-	rv64if-lp64f-- \
-	rv64iaf-lp64f-- \
-	rv64imf-lp64f-- \
-	rv64imaf-lp64f-- \
-	rv64imfc-lp64f-- \
+	rv64imac_zba_zbb-lp64-- \
 	rv64imafc-lp64f-- \
-	rv64ifd-lp64d-- \
-	rv64imfd-lp64d-- \
-	rv64iafd-lp64d-- \
+	rv64imafc_zba_zbb-lp64f-- \
 	rv64imafdc-lp64d-- \
+	rv64imafdc_zba_zbb-lp64d-- \
 	--cmodel=compact
 endif
 
