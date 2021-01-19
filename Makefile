@@ -317,7 +317,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libgloss\.a:libgloss_nano.a:g"`; \
 		cp -v $${bnls} $${inl}$${inls}; \
-	done
+	done; \
 	for bnls in `find $${bnl} -name crt0.o`; \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::"`; \
