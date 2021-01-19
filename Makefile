@@ -301,27 +301,27 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
 	for bnlc in `find $${bnl} -name libc.a`; \
 	do \
 		inlc=`echo $${bnlc} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libc\.a:libc_nano.a:g"`; \
-		cp $${bnlc} $${inl}$${inlc}; \
+		cp -v $${bnlc} $${inl}$${inlc}; \
 	done; \
 	for bnlm in `find $${bnl} -name libm.a`; \
 	do \
 		inlm=`echo $${bnlm} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libm\.a:libm_nano.a:g"`; \
-		cp $${bnlm} $${inl}$${inlm}; \
+		cp -v $${bnlm} $${inl}$${inlm}; \
 	done; \
 	for bnlg in `find $${bnl} -name libg.a`; \
 	do \
 		inlg=`echo $${bnlg} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libg\.a:libg_nano.a:g"`; \
-		cp $${bnlg} $${inl}$${inlg}; \
+		cp -v $${bnlg} $${inl}$${inlg}; \
 	done; \
 	for bnls in `find $${bnl} -name libgloss.a`; \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libgloss\.a:libgloss_nano.a:g"`; \
-		cp $${bnls} $${inl}$${inls}; \
+		cp -v $${bnls} $${inl}$${inls}; \
 	done
 	for bnls in `find $${bnl} -name crt0.o`; \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::"`; \
-		cp $${bnls} $${inl}$${inls}; \
+		cp -v $${bnls} $${inl}$${inls}; \
 	done
 # Copy nano header files into newlib install dir.
 	mkdir -p $(abspath $($@_INSTALL))/$(BARE_METAL_TUPLE)/include/newlib-nano; \
