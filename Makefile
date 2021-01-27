@@ -77,12 +77,20 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv32imfdc_zba_zbb-ilp32d-- \
 	rv32imafdc-ilp32d-- \
 	rv32imafdc_zba_zbb-ilp32d-- \
+	rv64ic-lp64-- \
+	rv64ic_zba_zbb-lp64-- \
 	rv64iac-lp64-- \
 	rv64iac_zba_zbb-lp64-- \
+	rv64imc-lp64-- \
+	rv64imc_zba_zbb-lp64-- \
 	rv64imac-lp64-- \
 	rv64imac_zba_zbb-lp64-- \
+	rv64imfc-lp64f-- \
+	rv64imfc_zba_zbb-lp64f-- \
 	rv64imafc-lp64f-- \
 	rv64imafc_zba_zbb-lp64f-- \
+	rv64imfdc-lp64d-- \
+	rv64imfdc_zba_zbb-lp64d-- \
 	rv64imafdc-lp64d-- \
 	rv64imafdc_zba_zbb-lp64d-- \
 	--cmodel=compact
