@@ -1,5 +1,5 @@
 # Version number, which should match the official version of the tool we are building
-RISCV_GCC_VERSION := 10.2.0
+RISCV_GCC_VERSION := $(shell cat src/riscv-gcc/gcc/BASE-VER)
 
 # Customization ID, which should identify the customization added to the original by SiFive
 FREEDOM_GCC_METAL_ID := dev-$(shell cd src/riscv-gcc/ && git log --pretty=format:'%h' -1)-$(shell cd src/riscv-newlib/ && git log --pretty=format:'%h' -1)
