@@ -19,6 +19,6 @@ proc check_syntax {exp val txt} {
 check_syntax {^[0-9a-zA-Z_\-\.\ ]+$} $::PACKAGE_WORDING "PACKAGE_WORDING"
 check_syntax {^[0-9a-z_\-\.]+$} $::PACKAGE_HEADING "PACKAGE_HEADING"
 check_syntax {^[0-9]+\.[0-9]+\.[0-9]+$} $::ORIGINAL_VERSION "ORIGINAL_VERSION"
-check_syntax {^[0-9a-z_\-\.]+$} $::FREEDOM_TOOLS_ID "FREEDOM_TOOLS_ID"
+check_syntax {^[0-9a-z_\-\.]+$|dev-.*} $::FREEDOM_TOOLS_ID "FREEDOM_TOOLS_ID"
 
 exit $res
