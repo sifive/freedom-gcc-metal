@@ -9,11 +9,11 @@ PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
 SRCNAME_GCC := riscv-gcc
-SRCPATH_GCC := $(SRCDIR)/$(SRCNAME_GCC)
+SRCPATH_GCC := src/$(SRCNAME_GCC)
 SRCNAME_NEWLIB := riscv-newlib
-SRCPATH_NEWLIB := $(SRCDIR)/$(SRCNAME_NEWLIB)
+SRCPATH_NEWLIB := src/$(SRCNAME_NEWLIB)
 SRCNAME_BINUTILS := binutils-metal
-SRCPATH_BINUTILS := $(SRCDIR)/$(SRCNAME_BINUTILS)
+SRCPATH_BINUTILS := src/$(SRCNAME_BINUTILS)
 BARE_METAL_ABI := lp64d
 BARE_METAL_ARCH := rv64imafdc
 BARE_METAL_CMODEL := medany
@@ -120,22 +120,28 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)
-	mkdir -p $(dir $@)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle/features
 	git log --format="[%ad] %s" > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).changelog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
-	tclsh scripts/generate-feature-xml.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)" $($@_TARGET) $(abspath $($@_INSTALL))
-	tclsh scripts/generate-chmod755-sh.tcl $(abspath $($@_INSTALL))
-	tclsh scripts/generate-site-xml.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)" $($@_TARGET) $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle
-	tclsh scripts/generate-bundle-mk.tcl $(abspath $($@_INSTALL)) RISCV_TAGS "$(FREEDOM_GCC_METAL_RISCV_TAGS)" TOOLS_TAGS "$(FREEDOM_GCC_METAL_TOOLS_TAGS)"
-	cp $(abspath $($@_INSTALL))/bundle.mk $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle
-	cd $($@_INSTALL); zip -rq $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle/features/$(PACKAGE_HEADING)_$(FREEDOM_GCC_METAL_ID)_$(RISCV_GCC_VERSION).jar *
-	tclsh scripts/check-maximum-path-length.tcl $(abspath $($@_INSTALL)) "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)"
+	rm -f $(abspath $($@_PROPERTIES))
+	echo "# SiFive Freedom Package Properties File" > $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_TYPE = freedom-tools" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_DESC_SEG = $(PACKAGE_WORDING)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_FIXED_ID = $(PACKAGE_HEADING)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_BUILD_ID = $(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_CORE_VER = $(RISCV_GCC_VERSION)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_TARGET = $($@_TARGET)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_VENDOR = SiFive" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_RIGHTS = sifive-v00 eclipse-v20" >> $(abspath $($@_PROPERTIES))
+	echo "RISCV_TAGS = $(FREEDOM_GCC_METAL_RISCV_TAGS)" >> $(abspath $($@_PROPERTIES))
+	echo "TOOLS_TAGS = $(FREEDOM_GCC_METAL_TOOLS_TAGS)" >> $(abspath $($@_PROPERTIES))
+	cp $(abspath $($@_PROPERTIES)) $(abspath $($@_INSTALL))/
+	tclsh scripts/check-maximum-path-length.tcl $(abspath $($@_INSTALL)) "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)"
 	tclsh scripts/check-same-name-different-case.tcl $(abspath $($@_INSTALL))
 	rm -rf $(abspath $($@_BUILD))/install-gcc
 	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-gcc
-	cat $($@_REC)/install-binutils-file-list | xargs rm -rf
+	cat $($@_BUILDLOG)/install-binutils-file-list | xargs rm -rf
 	date > $@
 
 # We might need some extra target libraries for this package
@@ -154,22 +160,22 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libs.stamp: \
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	tclsh scripts/check-naming-and-version-syntax.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)"
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
+	tclsh scripts/check-naming-and-version-syntax.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_GCC_VERSION)" "$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)"
 	rm -rf $($@_INSTALL)
 	mkdir -p $($@_INSTALL)
-	rm -rf $($@_REC)
-	mkdir -p $($@_REC)
+	rm -rf $($@_BUILDLOG)
+	mkdir -p $($@_BUILDLOG)
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
-	git log > $($@_REC)/$(PACKAGE_HEADING)-git-commit.log
-	cp .gitmodules $($@_REC)/$(PACKAGE_HEADING)-git-modules.log
-	git remote -v > $($@_REC)/$(PACKAGE_HEADING)-git-remote.log
-	git submodule status > $($@_REC)/$(PACKAGE_HEADING)-git-submodule.log
+	git log > $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-commit.log
+	cp .gitmodules $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-modules.log
+	git remote -v > $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-remote.log
+	git submodule status > $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-submodule.log
 	cp -a $(SRCPATH_BINUTILS)/src/$(BARE_METAL_BINUTILS) $(SRCPATH_NEWLIB) $(SRCPATH_GCC) $(dir $@)
 	cd $(dir $@)/riscv-gcc; ./contrib/download_prerequisites
 	cd $(dir $@)/riscv-gcc/gcc/config/riscv; rm t-elf-multilib; ./multilib-generator $(BARE_METAL_MULTILIBS_GEN) > t-elf-multilib
-	cp $(dir $@)/riscv-gcc/gcc/config/riscv/t-elf-multilib $($@_REC)/riscv-gcc-t-elf-multilib
+	cp $(dir $@)/riscv-gcc/gcc/config/riscv/t-elf-multilib $($@_BUILDLOG)/riscv-gcc-t-elf-multilib
 	date > $@
 
 # Reusing binutils build script across binutils-metal, gcc-metal and trace-decoder
@@ -179,9 +185,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/support.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-binutils-make-install.log
-	find $(abspath $($@_INSTALL)) -type f > $($@_REC)/install-binutils-file-list
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-binutils/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/build-binutils-make-install.log
+	find $(abspath $($@_INSTALL)) -type f > $($@_BUILDLOG)/install-binutils-file-list
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
@@ -189,7 +195,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-gcc/configure \
@@ -219,9 +225,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 		CFLAGS="-O2" \
 		CXXFLAGS="-O2" \
 		CFLAGS_FOR_TARGET="-Os $(BARE_METAL_CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-gcc-stage1-make-configure.log
-	$(MAKE) -C $(dir $@) all-gcc &>$($@_REC)/build-gcc-stage1-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install-gcc &>$($@_REC)/build-gcc-stage1-make-install.log
+		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_BUILDLOG)/build-gcc-stage1-make-configure.log
+	$(MAKE) -C $(dir $@) all-gcc &>$($@_BUILDLOG)/build-gcc-stage1-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install-gcc &>$($@_BUILDLOG)/build-gcc-stage1-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp: \
@@ -229,7 +235,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	@echo "PATH: $(PATH)"
@@ -242,13 +248,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib/build.stamp: \
 		--enable-newlib-io-c99-formats \
 		--enable-newlib-register-fini \
 		CFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE $(BARE_METAL_CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-newlib-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/build-newlib-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-newlib-make-install.log
+		CXXFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_BUILDLOG)/build-newlib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/build-newlib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/build-newlib-make-install.log
 # These install multiple copies of the same docs into the same destination
 # for a multilib build.  So we must not parallelize them.
 # TODO: Rewrite so that we only install one copy of the docs.
-	$(MAKE) -j1 -C $(dir $@) install-pdf install-html &>$($@_REC)/build-newlib-make-install-doc.log
+	$(MAKE) -j1 -C $(dir $@) install-pdf install-html &>$($@_BUILDLOG)/build-newlib-make-install-doc.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp: \
@@ -256,7 +262,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	@echo "PATH: $(PATH)"
@@ -276,9 +282,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano/build.stamp: \
 		--disable-newlib-supplied-syscalls \
 		--disable-nls \
 		CFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections $(BARE_METAL_CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-newlib-nano-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/build-newlib-nano-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/build-newlib-nano-make-install.log
+		CXXFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_BUILDLOG)/build-newlib-nano-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/build-newlib-nano-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/build-newlib-nano-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
@@ -287,7 +293,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 # Copy nano library files into newlib install dir.
 	set -e; \
 	bnl="$(abspath $($@_BUILD))/build-newlib-nano-install/$(BARE_METAL_TUPLE)/lib"; \
@@ -328,7 +334,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-gcc/configure \
@@ -359,9 +365,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp: \
 		CFLAGS="-O2" \
 		CXXFLAGS="-O2" \
 		CFLAGS_FOR_TARGET="-Os $(BARE_METAL_CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_REC)/build-gcc-stage2-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/build-gcc-stage2-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_REC)/build-gcc-stage2-make-install.log
+		CXXFLAGS_FOR_TARGET="-Os $(BARE_METAL_CXXFLAGS_FOR_TARGET)" &>$($@_BUILDLOG)/build-gcc-stage2-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/build-gcc-stage2-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install install-pdf install-html &>$($@_BUILDLOG)/build-gcc-stage2-make-install.log
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/riscv64-unknown-elf-c++
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/riscv64-unknown-elf-g++
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/riscv64-unknown-elf-gcc
