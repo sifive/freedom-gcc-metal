@@ -6,6 +6,7 @@ include Version.mk
 PACKAGE_WORDING := Bare Metal GCC
 PACKAGE_HEADING := riscv64-unknown-elf-gcc
 PACKAGE_VERSION := $(RISCV_GCC_VERSION)-$(FREEDOM_GCC_METAL_ID)$(EXTRA_SUFFIX)
+PACKAGE_COMMENT := \# SiFive Freedom Package Properties File
 
 # Source code directory references
 SRCNAME_GCC := riscv-gcc
@@ -32,60 +33,68 @@ BARE_METAL_MULTILIBS_GEN := \
 	rv32imafdc-ilp32d-- \
 	rv64imac-lp64-- \
 	rv64imafc-lp64f-- \
-	rv64imafdc-lp64d--
+	rv64imafdc-lp64d-- \
+	--cmodel=compact
 else ifeq ($(EXTRA_OPTION),basic)
 BARE_METAL_MULTILIBS_GEN := \
-	rv32e-ilp32e--m,a,ma,c,mc,ac \
+	rv32e-ilp32e-- \
 	rv32emac-ilp32e-- \
-	rv32i-ilp32--m,a,ma,c,mc,ac \
+	rv32i-ilp32-- \
 	rv32imac-ilp32-- \
-	rv32if-ilp32f--mf,af,maf,fc,mfc,afc \
+	rv32if-ilp32f-- \
 	rv32imafc-ilp32f-- \
-	rv32ifd-ilp32d--mfd,afd,mafd,fdc,mfdc,afdc \
+	rv32ifd-ilp32d-- \
 	rv32imafdc-ilp32d-- \
-	rv64i-lp64--m,a,ma,c,mc,ac \
+	rv64i-lp64-- \
 	rv64imac-lp64-- \
-	rv64if-lp64f--mf,af,maf,fc,mfc,afc \
+	rv64if-lp64f-- \
 	rv64imafc-lp64f-- \
-	rv64ifd-lp64d--mfd,afd,mafd,fdc,mfdc,afdc \
-	rv64imafdc-lp64d--
+	rv64ifd-lp64d-- \
+	rv64imafdc-lp64d-- \
+	--cmodel=compact
 else
 BARE_METAL_MULTILIBS_GEN := \
-	rv32e-ilp32e--c*v*zvqmac \
-	rv32ea-ilp32e--m*v*zvqmac \
-	rv32em-ilp32e--c*v*zvqmac \
-	rv32eac-ilp32e--v*zvqmac \
-	rv32emac-ilp32e--v*zvqmac \
-	rv32i-ilp32--c*f*d*zfh*v*zvqmac \
-	rv32ia-ilp32--m*f*d*v*zfh*zvqmac \
-	rv32im-ilp32--c*f*d*zfh*v*zvqmac \
-	rv32iac-ilp32--f*d*v*zfh*zvqmac \
-	rv32imac-ilp32-rv32imafc,rv32imafdc,rv32imafczfh,rv32imafdczfh-v*zvqmac \
-	rv32if-ilp32f--d*c*v*zfh*zvqmac \
-	rv32iaf-ilp32f--d*c*v*zfh*zvqmac \
-	rv32imf-ilp32f--d*v*zfh*zvqmac \
-	rv32imaf-ilp32f-rv32imafd-zfh*v*zvqmac \
-	rv32imfc-ilp32f--d*v*zfh*zvqmac \
-	rv32imafc-ilp32f-rv32imafdc-v*zfh*zvqmac \
-	rv32ifd-ilp32d--c*v*zfh*zvqmac \
-	rv32imfd-ilp32d--c*v*zfh*zvqmac \
-	rv32iafd-ilp32d-rv32imafd,rv32iafdc-v*zfh*zvqmac \
-	rv32imafdc-ilp32d--v*zfh*zvqmac \
-	rv64i-lp64--f*d*c*v*zfh*zvqmac \
-	rv64ia-lp64--m*f*d*v*zfh*zvqmac \
-	rv64im-lp64--f*d*c*v*zfh*zvqmac \
-	rv64iac-lp64--f*d*v*zfh*zvqmac \
-	rv64imac-lp64-rv64imafc,rv64imafdc,rv64imafczfh,rv64imafdczfh-v*zvqmac \
-	rv64if-lp64f--d*c*v*zfh*zvqmac \
-	rv64iaf-lp64f--d*c*v*zfh*zvqmac \
-	rv64imf-lp64f--d*v*zfh*zvqmac \
-	rv64imaf-lp64f-rv64imafd-v*zfh*zvqmac \
-	rv64imfc-lp64f--d*v*zfh*zvqmac \
-	rv64imafc-lp64f-rv64imafdc-v*zfh*zvqmac \
-	rv64ifd-lp64d--c*v*zfh*zvqmac \
-	rv64imfd-lp64d--c*v*zfh*zvqmac \
-	rv64iafd-lp64d-rv64imafd,rv64iafdc-v*zfh*zvqmac \
-	rv64imafdc-lp64d--v*zfh*zvqmac
+	rv32ec-ilp32e-- \
+	rv32ec_zba_zbb-ilp32e-- \
+	rv32eac-ilp32e-- \
+	rv32eac_zba_zbb-ilp32e-- \
+	rv32emc-ilp32e-- \
+	rv32emc_zba_zbb-ilp32e-- \
+	rv32emac-ilp32e-- \
+	rv32emac_zba_zbb-ilp32e-- \
+	rv32ic-ilp32-- \
+	rv32ic_zba_zbb-ilp32-- \
+	rv32iac-ilp32-- \
+	rv32iac_zba_zbb-ilp32-- \
+	rv32imc-ilp32-- \
+	rv32imc_zba_zbb-ilp32-- \
+	rv32imac-ilp32-- \
+	rv32imac_zba_zbb-ilp32-- \
+	rv32imfc-ilp32f-- \
+	rv32imfc_zba_zbb-ilp32f-- \
+	rv32imafc-ilp32f-- \
+	rv32imafc_zba_zbb-ilp32f-- \
+	rv32imfdc-ilp32d-- \
+	rv32imfdc_zba_zbb-ilp32d-- \
+	rv32imafdc-ilp32d-- \
+	rv32imafdc_zba_zbb-ilp32d-- \
+	rv64ic-lp64-- \
+	rv64ic_zba_zbb-lp64-- \
+	rv64iac-lp64-- \
+	rv64iac_zba_zbb-lp64-- \
+	rv64imc-lp64-- \
+	rv64imc_zba_zbb-lp64-- \
+	rv64imac-lp64-- \
+	rv64imac_zba_zbb-lp64-- \
+	rv64imfc-lp64f-- \
+	rv64imfc_zba_zbb-lp64f-- \
+	rv64imafc-lp64f-- \
+	rv64imafc_zba_zbb-lp64f-- \
+	rv64imfdc-lp64d-- \
+	rv64imfdc_zba_zbb-lp64d-- \
+	rv64imafdc-lp64d-- \
+	rv64imafdc_zba_zbb-lp64d-- \
+	--cmodel=compact
 endif
 
 # Some special package configure flags for specific targets
@@ -119,13 +128,14 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage2/build.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_PROPERTIES := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).properties,$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/build/$(PACKAGE_HEADING),$@))
 	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)
 	git log --format="[%ad] %s" > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).changelog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
 	rm -f $(abspath $($@_PROPERTIES))
-	echo "# SiFive Freedom Package Properties File" > $(abspath $($@_PROPERTIES))
+	echo "$(PACKAGE_COMMENT)" > $(abspath $($@_PROPERTIES))
 	echo "PACKAGE_TYPE = freedom-tools" >> $(abspath $($@_PROPERTIES))
 	echo "PACKAGE_DESC_SEG = $(PACKAGE_WORDING)" >> $(abspath $($@_PROPERTIES))
 	echo "PACKAGE_FIXED_ID = $(PACKAGE_HEADING)" >> $(abspath $($@_PROPERTIES))
@@ -142,6 +152,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 	rm -rf $(abspath $($@_BUILD))/install-gcc
 	cp -a $(abspath $($@_INSTALL)) $(abspath $($@_BUILD))/install-gcc
 	cat $($@_BUILDLOG)/install-binutils-file-list | xargs rm -rf
+	echo $(PATH)
 	date > $@
 
 # We might need some extra target libraries for this package
@@ -151,10 +162,10 @@ $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/libs.stamp: \
 
 $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libs.stamp: \
 		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp
-	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libwinpthread*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
-	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libgcc_s_seh*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
-	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libstdc*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
-	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libssp*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	-$(WIN64)-gcc -print-search-dirs | grep ^programs | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libwinpthread*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	-$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libgcc_s_seh*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	-$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libstdc*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
+	-$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libssp*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
@@ -198,6 +209,11 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp: \
 	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/build-gcc-stage1/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
+	# Workaround for CentOS random build fail issue
+	#
+	# Corresponding bugzilla entry on upstream:
+	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=92008
+	touch $(abspath $($@_BUILD))/riscv-gcc/intl/plural.c
 	cd $(dir $@) && $(abspath $($@_BUILD))/riscv-gcc/configure \
 		--target=$(BARE_METAL_TUPLE) \
 		$($($@_TARGET)-gcc-host) \
@@ -301,27 +317,27 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/build-newlib-nano-install/build.stamp: \
 	for bnlc in `find $${bnl} -name libc.a`; \
 	do \
 		inlc=`echo $${bnlc} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libc\.a:libc_nano.a:g"`; \
-		cp $${bnlc} $${inl}$${inlc}; \
+		cp -v $${bnlc} $${inl}$${inlc}; \
 	done; \
 	for bnlm in `find $${bnl} -name libm.a`; \
 	do \
 		inlm=`echo $${bnlm} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libm\.a:libm_nano.a:g"`; \
-		cp $${bnlm} $${inl}$${inlm}; \
+		cp -v $${bnlm} $${inl}$${inlm}; \
 	done; \
 	for bnlg in `find $${bnl} -name libg.a`; \
 	do \
 		inlg=`echo $${bnlg} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libg\.a:libg_nano.a:g"`; \
-		cp $${bnlg} $${inl}$${inlg}; \
+		cp -v $${bnlg} $${inl}$${inlg}; \
 	done; \
 	for bnls in `find $${bnl} -name libgloss.a`; \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::" | $(SED) -e "s:libgloss\.a:libgloss_nano.a:g"`; \
-		cp $${bnls} $${inl}$${inls}; \
-	done
+		cp -v $${bnls} $${inl}$${inls}; \
+	done; \
 	for bnls in `find $${bnl} -name crt0.o`; \
 	do \
 		inls=`echo $${bnls} | $(SED) -e "s:$${bnl}::"`; \
-		cp $${bnls} $${inl}$${inls}; \
+		cp -v $${bnls} $${inl}$${inls}; \
 	done
 # Copy nano header files into newlib install dir.
 	mkdir -p $(abspath $($@_INSTALL))/$(BARE_METAL_TUPLE)/include/newlib-nano; \
